@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -16,7 +17,10 @@ func main() {
 		os.Exit(1)
 	}
 	command := args[1]
-	ts := task.NewTaskStore()
+	ts, err := task.NewTaskStore("tasks.json")
+	if err != nil {
+		log.Fatal(err)
+	}
 	switch command {
 	case "add":
 		cs := args[2:]
@@ -25,7 +29,10 @@ func main() {
 			os.Exit(1)
 		}
 		c := strings.Join(cs, " ")
-		task := ts.Add(c)
+		task, err := ts.Add(c)
+		if err != nil {
+			log.Fatal(err)
+		}
 		fmt.Printf("Task added: [%d] %s\n", task.ID, task.Title)
 	case "list":
 		tasks := ts.List()

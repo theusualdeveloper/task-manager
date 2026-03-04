@@ -2,6 +2,7 @@ package task
 
 import (
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -13,24 +14,40 @@ type Task struct {
 }
 
 type TaskStore struct {
-	tasks   []Task
-	counter int
+	tasks []Task
+	*JSONStorage
 }
 
-func NewTaskStore() *TaskStore {
-	return &TaskStore{}
+func NewTaskStore(filePath string) (*TaskStore, error) {
+	js := NewJSONStorage(filePath)
+	tasks, err := js.Load()
+	if err != nil {
+		return nil, fmt.Errorf("Error in load tasks: %s", err)
+	}
+	ts := &TaskStore{
+		tasks:       tasks,
+		JSONStorage: &js,
+	}
+	return ts, nil
 }
 
-func (ts *TaskStore) Add(title string) Task {
+func (ts *TaskStore) Add(title string) (Task, error) {
+	lid := 0
+	if len(ts.tasks) > 0 {
+		lid = ts.tasks[len(ts.tasks)-1].ID
+	}
 	task := Task{
-		ID:        ts.counter + 1,
+		ID:        lid + 1,
 		Title:     title,
 		Done:      false,
 		CreatedAt: time.Now(),
 	}
 	ts.tasks = append(ts.tasks, task)
-	ts.counter++
-	return task
+	err := ts.JSONStorage.Save(ts.tasks)
+	if err != nil {
+		return Task{}, err
+	}
+	return task, nil
 }
 
 func (ts *TaskStore) List() []Task {
@@ -49,6 +66,10 @@ func (ts *TaskStore) Complete(id int) error {
 		return errors.New("task not found")
 	}
 	ts.tasks[ti].Done = true
+	err := ts.JSONStorage.Save(ts.tasks)
+	if err != nil {
+		return fmt.Errorf("error in saving tasks: %s", err)
+	}
 	return nil
 }
 
@@ -66,5 +87,9 @@ func (ts *TaskStore) Delete(id int) error {
 		return errors.New("task not found")
 	}
 	ts.tasks = filtered
+	err := ts.JSONStorage.Save(ts.tasks)
+	if err != nil {
+		return fmt.Errorf("error in saving tasks: %s", err)
+	}
 	return nil
 }
