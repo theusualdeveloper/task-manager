@@ -22,7 +22,7 @@ func NewTaskStore(filePath string) (*TaskStore, error) {
 	js := NewJSONStorage(filePath)
 	tasks, err := js.Load()
 	if err != nil {
-		return nil, fmt.Errorf("Error in load tasks: %s", err)
+		return nil, fmt.Errorf("Error in load tasks: %w", err)
 	}
 	ts := &TaskStore{
 		tasks:       tasks,
@@ -68,7 +68,7 @@ func (ts *TaskStore) Complete(id int) error {
 	ts.tasks[ti].Done = true
 	err := ts.JSONStorage.Save(ts.tasks)
 	if err != nil {
-		return fmt.Errorf("error in saving tasks: %s", err)
+		return fmt.Errorf("error in saving tasks: %w", err)
 	}
 	return nil
 }
@@ -89,7 +89,7 @@ func (ts *TaskStore) Delete(id int) error {
 	ts.tasks = filtered
 	err := ts.JSONStorage.Save(ts.tasks)
 	if err != nil {
-		return fmt.Errorf("error in saving tasks: %s", err)
+		return fmt.Errorf("error in saving tasks: %w", err)
 	}
 	return nil
 }

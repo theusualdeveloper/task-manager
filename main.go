@@ -36,6 +36,10 @@ func main() {
 		fmt.Printf("Task added: [%d] %s\n", task.ID, task.Title)
 	case "list":
 		tasks := ts.List()
+		if len(tasks) == 0 {
+			fmt.Println("No tasks were found.")
+			return
+		}
 		var done string
 		for _, task := range tasks {
 			if task.Done {

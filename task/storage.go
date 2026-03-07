@@ -20,11 +20,11 @@ func NewJSONStorage(path string) JSONStorage {
 func (js JSONStorage) Save(tasks []Task) error {
 	b, err := json.Marshal(tasks)
 	if err != nil {
-		return fmt.Errorf("error in marshaling: %s", err)
+		return fmt.Errorf("error in marshaling: %w", err)
 	}
-	err = os.WriteFile(js.filePath, b, 0666)
+	err = os.WriteFile(js.filePath, b, 0644)
 	if err != nil {
-		return fmt.Errorf("error in writing to the file: %s", err)
+		return fmt.Errorf("error in writing to the file: %w", err)
 	}
 	return nil
 }
@@ -35,12 +35,12 @@ func (js JSONStorage) Load() ([]Task, error) {
 		if errors.Is(err, os.ErrNotExist) {
 			return []Task{}, nil
 		}
-		return nil, fmt.Errorf("error in reading file: %s", err)
+		return nil, fmt.Errorf("error in reading file: %w", err)
 	}
 	var tasks []Task
 	err = json.Unmarshal(b, &tasks)
 	if err != nil {
-		return nil, fmt.Errorf("error in unmarshaling: %s", err)
+		return nil, fmt.Errorf("error in unmarshaling: %w", err)
 	}
 	return tasks, nil
 }
